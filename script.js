@@ -7,21 +7,22 @@ menuButton.addEventListener('click', () => {
 nav.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
   nav.classList.remove('open');
   menuButton.setAttribute('aria-expanded', 'false');
+  nav.querySelectorAll('a').forEach(item => item.classList.remove('active'));
+  link.classList.add('active');
 }));
-const search = document.getElementById('publication-search');
-const publications = [...document.querySelectorAll('.publication')];
-const count = document.getElementById('publication-count');
-const noResults = document.getElementById('no-results');
-function filterPublications() {
-  const query = search.value.trim().toLowerCase();
-  let visible = 0;
-  publications.forEach(item => {
-    const matches = (item.dataset.search + ' ' + item.innerText).toLowerCase().includes(query);
-    item.hidden = !matches;
-    if (matches) visible++;
-  });
-  count.textContent = `${visible} publication${visible === 1 ? '' : 's'}`;
-  noResults.hidden = visible !== 0;
+const sections = [...document.querySelectorAll('main section[id]')];
+if ('IntersectionObserver' in window) {
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const target = entry.target.id === 'pi' || entry.target.classList.contains('pi-intro') ? '#pi' : '#' + entry.target.id;
+      const link = nav.querySelector(`a[href="${target}"]`);
+      if (link) {
+        nav.querySelectorAll('a').forEach(item => item.classList.remove('active'));
+        link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-25% 0px -65% 0px' });
+  sections.forEach(section => observer.observe(section));
 }
-search.addEventListener('input', filterPublications);
 document.getElementById('year').textContent = new Date().getFullYear();
